@@ -3,25 +3,25 @@
     <div  class="animatable_content_box ">
         <div v-if="stable_diffusion.is_backend_loaded">
             <div class="textbox_section" >
-                <textarea 
-                    v-model="prompt" 
-                    placeholder="Enter your prompt here" 
-                    style="border-radius: 12px 12px 12px 12px; width: calc(100%); resize: none; " 
-                    class="form-control"  
+                <textarea
+                    v-model="prompt"
+                    placeholder="Enter your prompt here"
+                    style="border-radius: 12px 12px 12px 12px; width: calc(100%); resize: none; "
+                    class="form-control"
                     v-bind:class="{ 'disabled' : !stable_diffusion.is_input_avail}"
                     :rows="is_negative_prompt_avail ? 2:3"></textarea>
 
-                <textarea 
+                <textarea
                     v-if="is_negative_prompt_avail"
-                    v-model="negative_prompt" 
-                    placeholder="Enter your negative prompt here" 
-                    style="border-radius: 12px 12px 12px 12px; width: calc(100%); resize: none; margin-top: 5px; " 
-                    class="form-control negative_prompt_tb"  
+                    v-model="negative_prompt"
+                    placeholder="Enter your negative prompt here"
+                    style="border-radius: 12px 12px 12px 12px; width: calc(100%); resize: none; margin-top: 5px; "
+                    class="form-control negative_prompt_tb"
                     v-bind:class="{ 'disabled' : !stable_diffusion.is_input_avail}"
                     :rows="1"></textarea>
 
                 <div v-if="stable_diffusion.is_input_avail" class="content_toolbox" style="margin-top:10px; margin-bottom:-10px;">
-                    
+
                     <div class="l_button button_medium button_colored" style="float:right ; " @click="generate_from_prompt">Generate</div>
 
                     <!-- <div style="float:right;"  >
@@ -30,13 +30,13 @@
 
                     <div style="float:right; margin-top: -5px;" >
                         <b-dropdown id="dropdown-form" variant="link" ref="dropdown" toggle-class="text-decoration-none" no-caret >
-                        
+
                             <template #button-content>
                                 <div class="l_button"  style="" >Options</div>
                             </template>
 
                             <b-dropdown-form style="min-width: 240px ; ">
-                                
+
                                 <b-form-group inline  label="" style="margin-bottom: 6px;" >
                                     <label class="mr-sm-2" style="margin-right: 8px ;" for="inline-form-custom-select-pref">Num Images: </label>
                                     <b-form-select
@@ -94,7 +94,7 @@
 
                                 <b-form-group inline  label="" style="margin-bottom: 6px;" >
                                 <label class="mr-sm-2" style="margin-right: 8px ;" for="inline-form-custom-select-pref">Seed: </label>
-                    
+
                                 <b-form-input onkeypress="return event.keyCode != 13;"  size="sm" class="mr-sm-2"  v-model="seed" style="max-width: 40px; float: right; margin-right: 30px;" ></b-form-input>
 
                                 </b-form-group>
@@ -109,7 +109,7 @@
 
                     <div style="float:right; margin-top: -5px; " >
                         <b-dropdown id="dropdown-form" variant="link" ref="dropdown" toggle-class="text-decoration-none" no-caret >
-                        
+
                             <template #button-content>
                                 <div class="l_button"  style="margin-right: -20px;" >Styles</div>
                             </template>
@@ -128,8 +128,8 @@
                                     <p>Source : cmdr2</p>
                                 </div>
 
-                                
-  
+
+
                             </b-dropdown-form>
                         </b-dropdown>
                     </div>
@@ -137,7 +137,7 @@
                     <div class="l_button button_medium" style="float:right ;margin-right: -10px; margin-top: -1px;" @click="open_arthub">Prompt Ideas</div>
 
 
-                    
+
                 </div>
                 <div v-else-if="stable_diffusion.generated_by=='txt2img'"  class="content_toolbox" style="margin-top:10px; margin-bottom:-10px;">
                     <div v-if="is_stopping" class="l_button button_medium button_colored" style="float:right" @click="stop_generation">Stopping ...</div>
@@ -151,22 +151,22 @@
                     <ImageItem :app_state="app_state"  :path="generated_images[0]" :style_obj="{ 'width': 'calc(100vh - 380px )' , 'margin-top': '60px' }"></ImageItem>
                 </center>
             </div>
-            
+
             <div>
-                <br> 
+                <br>
                 <b-row v-if="generated_images.length > 1"  class="justify-content-md-center" >
 
                     <b-col  v-for="img in generated_images" :key="img" style="margin-top:80px"  md="6" lg="4" xl="3"  >
                         <center>
-                            
+
                             <ImageItem :app_state="app_state"  :path="img" :style_obj="{'max-width' :'85%'}"></ImageItem>
                         </center>
                     </b-col>
-                        
 
-                
+
+
                 </b-row>
-                <br> 
+                <br>
             </div>
 
             <div v-if="backend_error" style="color:red ; margin-top:50px;">
@@ -179,13 +179,19 @@
         <div v-if="!stable_diffusion.is_input_avail && stable_diffusion.generated_by=='txt2img'">
             <LoaderModal :loading_percentage="done_percentage" loading_title="Generating" :loading_desc="stable_diffusion.generation_state_msg"></LoaderModal>
         </div>
-    
+
     <div class="bottom_float">
         <p>Please close other applications for best speed.</p>
     </div>
 
-    <div @click="share_current_arthub"  v-if="generated_images.length > 0"  class="l_button bottom_float" style="right : 10px; bottom : 15px; background-color: inherit; cursor: pointer;">Share on ArtHub.ai</div>
-
+    <b-dropdown v-if="generated_images.length > 0" variant="link" size="sm" toggle-class="text-decoration-none" no-caret class="l_button bottom_float" style="right : 10px; bottom : 15px; background-color: inherit; cursor: pointer;">
+        <template #button-content>
+            <div class=" l_button ">
+                Share
+            </div>
+        </template>
+        <b-dropdown-item-button v-for="option in share_options" :key="option.name" @click="share_current_arthub(option)"  >Share on {{option.name}}</b-dropdown-item-button>
+    </b-dropdown>
 
 </div>
 
@@ -197,38 +203,40 @@
 import LoaderModal from '../components_bare/LoaderModal.vue'
 import Vue from 'vue'
 import ImageItem from '../components/ImageItem.vue'
-import {share_on_arthub} from '../utils.js'
+import {open_share_url, share_options} from '../utils.js'
+
 
 export default {
     name: 'ImgGenerate',
     props: {
-        app_state : Object   , 
+        app_state : Object   ,
         stable_diffusion : Object,
     },
     components: {LoaderModal, ImageItem},
     mounted() {
-       
+
     },
     data() {
         return {
-            img_w : 512, 
-            img_h : 512 , 
+            img_w : 512,
+            img_h : 512 ,
             dif_steps : 25,
-            guidence_scale : 7.5 , 
-            is_adv_options : false , 
-            seed : ""  , 
+            guidence_scale : 7.5 ,
+            is_adv_options : false ,
+            seed : ""  ,
             prompt : "",
             num_imgs : 1,
-            batch_size : 1 , 
+            batch_size : 1 ,
             generated_images : [],
             backend_error : "",
             done_percentage : -1,
             is_stopping : false,
             modifiers : require("../modifiers.json"),
-            is_negative_prompt_avail : false, 
+            is_negative_prompt_avail : false,
             negative_prompt : "",
+            share_options,
         };
-        
+
     },
     methods: {
         generate_from_prompt(){
@@ -242,14 +250,14 @@ export default {
 
 
             let params = {
-                prompt : this.prompt , 
-                W : Number(this.img_w) , 
-                H : Number(this.img_h) , 
+                prompt : this.prompt ,
+                W : Number(this.img_w) ,
+                H : Number(this.img_h) ,
                 seed :seed,
-                scale : this.guidence_scale , 
-                ddim_steps : this.dif_steps, 
-                num_imgs : this.num_imgs , 
-                batch_size : this.batch_size , 
+                scale : this.guidence_scale ,
+                ddim_steps : this.dif_steps,
+                num_imgs : this.num_imgs ,
+                batch_size : this.batch_size ,
 
             }
 
@@ -274,22 +282,22 @@ export default {
                     if(!(that.app_state.history[history_key])){
                         let p = {
                             "prompt":that.prompt , "seed": seed, "img_w":that.img_w , "img_h":that.img_h ,  "key":history_key , "imgs" : [],
-                            "guidence_scale" : that.guidence_scale , "dif_steps" : that.dif_steps 
+                            "guidence_scale" : that.guidence_scale , "dif_steps" : that.dif_steps
                         }
                         if(that.is_negative_prompt_avail)
                             p['negative_prompt'] = that.negative_prompt;
                         Vue.set(that.app_state.history, history_key , p);
                     }
-                        
 
-                    
+
+
                     that.app_state.history[history_key].imgs.push(img_path)
 
                     console.log(that.app_state.history)
 
                 },
                 on_progress(p ){
-                    that.done_percentage = p;                
+                    that.done_percentage = p;
                 },
                 on_err(err){
                     that.backend_error = err;
@@ -301,7 +309,7 @@ export default {
 
            if(this.stable_diffusion)
                 this.stable_diffusion.text_to_img(params, callbacks, 'txt2img');
-        } , 
+        } ,
 
 
         open_arthub(){
@@ -317,24 +325,27 @@ export default {
             this.prompt += ", " + tag;
         },
 
-        share_current_arthub(){
+        async share_current_arthub(share_option){
             this.app_state.global_loader_modal_msg = "Uploading";
             let params =  {
-                "Img Width": Number(this.img_w) , 
-                "Img Height" : Number(this.img_h) , 
+                "Img Width": Number(this.img_w) ,
+                "Img Height" : Number(this.img_h) ,
                 Seed :this.computed_seed,
-                Scale : this.guidence_scale , 
+                Scale : this.guidence_scale ,
                 Steps : this.dif_steps
             }
-            if(this.is_negative_prompt_avail)
+
+            if (this.is_negative_prompt_avail)
                 params['Negative Prompt'] = this.negative_prompt;
 
-            let that = this;
-            share_on_arthub( that.generated_images , params , that.prompt).then((
-                function(){ that.app_state.global_loader_modal_msg = ""}
-            )).catch(
-                function(){alert("Error in uploading.") ; that.app_state.global_loader_modal_msg = ""}
-            )
+            try {
+                await open_share_url(share_option.url, this.generated_images , params, this.prompt);
+            } catch (error) {
+                console.error(error);
+                alert("Error in uploading.");
+            }
+
+            this.app_state.global_loader_modal_msg = "";
         },
 
     },
@@ -367,9 +378,9 @@ export default {
     }
 
     .ad_form_box{
-        float:left; 
-        background-color: rgba(0, 0, 0, 0.1); 
-        padding:10px ; 
+        float:left;
+        background-color: rgba(0, 0, 0, 0.1);
+        padding:10px ;
         margin-right: 10px;
          border-radius: 3px 3px 3px 3px;
     }
