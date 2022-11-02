@@ -145,7 +145,7 @@ const share_options = [
     },
     {
         name: 'web3.storage',
-        url: 'http://localhost:5173/ai-artwork-uploader',
+        url: 'https://web3-storage.github.io/ai-artwork-uploader',
     }
 ]
 
@@ -159,7 +159,7 @@ async function open_share_url(share_url, imgs , params,  prompt ) {
 
     share_url += `?description=${prompt}&`;
     params.model_version = "DiffusionBee";
-    share_url += `params="${JSON.stringify(params)}&`
+    share_url += `params=${JSON.stringify(params)}&`
     share_url += `images=${urls.join(',')}`
     window.ipcRenderer.sendSync('open_url', share_url );
 }
