@@ -40,7 +40,7 @@
                             Share 
                         </div>
                     </template>
-                    <b-dropdown-item-button   @click="share_on_arthub(history_box)"  >Share on ArtHub.ai</b-dropdown-item-button>
+                    <b-dropdown-item-button v-for="option in share_options" :key="option.name"   @click="share_images(option, history_box)"  >Share on {{option.name}}</b-dropdown-item-button>
                 </b-dropdown>
 
                 
@@ -89,7 +89,7 @@
 <script>
 import ImageItem from '../components/ImageItem.vue'
 import {native_confirm} from "../native_functions_vue_bridge.js";
-import {share_on_arthub} from '../utils.js'
+import {open_share_url, share_options} from '../utils.js'
 
 import Vue from 'vue'
 import Fuse from 'fuse.js'
@@ -109,6 +109,7 @@ export default {
         return {
             searchText: '',
             currentPage: 1,
+            share_options,
         };
     },
 
@@ -167,17 +168,18 @@ export default {
             }
         },
 
-        share_on_arthub(box){
+        async share_images(share_option, box){
             this.app_state.global_loader_modal_msg = "Uploading";
             let params = this.get_box_params_dict(box);
-            let that = this;
-            share_on_arthub(box.imgs , params , box.prompt).then((
-                function(){ that.app_state.global_loader_modal_msg = ""}
-            )).catch(
-                function(){alert("Error in uploading.") ; that.app_state.global_loader_modal_msg = ""}
-            )
-        }
+            try {
+                await open_share_url(share_option.url, box.imgs , params , box.prompt);
+            } catch (error) {
+                console.error(error);
+                alert("Error in uploading.");
+            }
 
+            this.app_state.global_loader_modal_msg = ""
+        }
     },
 }
 </script>

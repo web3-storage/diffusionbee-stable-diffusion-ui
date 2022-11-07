@@ -108,8 +108,14 @@
         <p>Please close other applications for best speed.</p>
     </div>
 
-    <div @click="share_current_arthub"  v-if="generated_images.length > 0"  class="l_button bottom_float" style="right : 10px; bottom : 15px; background-color: inherit; cursor: pointer;">Share on ArtHub.ai</div>
-
+    <b-dropdown v-if="generated_images.length > 0" variant="link" size="sm" toggle-class="text-decoration-none" no-caret class="l_button bottom_float" style="right : 10px; bottom : 15px; background-color: inherit; cursor: pointer;">
+        <template #button-content>
+            <div class=" l_button ">
+                Share
+            </div>
+        </template>
+        <b-dropdown-item-button v-for="option in share_options" :key="option.name" @click="share_current_arthub(option)"  >Share on {{option.name}}</b-dropdown-item-button>
+    </b-dropdown>
 
 </div>
 
@@ -121,7 +127,7 @@
 import LoaderModal from '../components_bare/LoaderModal.vue'
 import Vue from 'vue'
 import ImageItem from '../components/ImageItem.vue'
-import {share_on_arthub} from '../utils.js'
+import {open_share_url, share_options} from '../utils.js'
 import SDOptionsDropdown from '../components_bare/SDOptionsDropdown.vue'
 
 export default {
@@ -152,7 +158,8 @@ export default {
             modifiers : require("../modifiers.json"),
             is_negative_prompt_avail : false, 
             negative_prompt : "",
-            selected_model : 'Default'
+            selected_model : 'Default',
+            share_options,
         };
         
     },
@@ -257,7 +264,7 @@ export default {
             this.prompt += ", " + tag;
         },
 
-        share_current_arthub(){
+        async share_current_arthub(share_option){
             this.app_state.global_loader_modal_msg = "Uploading";
             let params =  {
                 "Img Width": Number(this.img_w) , 
@@ -270,12 +277,14 @@ export default {
             if(this.is_negative_prompt_avail)
                 params['Negative Prompt'] = this.negative_prompt;
 
-            let that = this;
-            share_on_arthub( that.generated_images , params , that.prompt).then((
-                function(){ that.app_state.global_loader_modal_msg = ""}
-            )).catch(
-                function(){alert("Error in uploading.") ; that.app_state.global_loader_modal_msg = ""}
-            )
+            try {
+                await open_share_url(share_option.url, this.generated_images , params, this.prompt);
+            } catch (error) {
+                console.error(error);
+                alert("Error in uploading.");
+            }
+
+            this.app_state.global_loader_modal_msg = "";
         },
 
     },

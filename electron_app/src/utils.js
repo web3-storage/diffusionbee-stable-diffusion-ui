@@ -139,21 +139,28 @@ async function temp_upload_img(img_path) {
   
   }
 
-// this will only be called when the user clicks to upload thier data for sharing. 
-async function share_on_arthub(imgs , params,  prompt ) {
+// Sharable URLS
+const share_options = [
+    {
+        name: 'ArtHub.ai',
+        url: 'https://arthub.ai/upload',
+    },
+    {
+        name: 'web3.storage',
+        url: 'https://web3-storage.github.io/ai-artwork-uploader',
+    }
+]
+
+// this will only be called when the user clicks to upload their data for sharing.
+async function open_share_url(share_url, imgs , params,  prompt ) {
     let urls = [];
     for(let im of imgs)
         if(im != 'nsfw')
             urls.push( await temp_upload_img(im))
 
-    console.log(urls.join(','))
-
-    let share_url = "https://arthub.ai/upload?";
-
     params = JSON.parse(JSON.stringify(params))
 
-
-    share_url += "description="+ prompt + "&";
+    share_url += `?description=${prompt}&`;
     if(!params.model_version)
         params.model_version = ""
     params.model_version = "DiffusionBee" + params.model_version  ;
@@ -164,4 +171,4 @@ async function share_on_arthub(imgs , params,  prompt ) {
 
 
 
-export { compute_n_cols ,resolve_asset_illustration , simple_hash , open_popup, share_on_arthub}
+export { compute_n_cols ,resolve_asset_illustration , simple_hash , open_popup, open_share_url, share_options}
