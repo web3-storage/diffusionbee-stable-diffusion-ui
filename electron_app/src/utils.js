@@ -45,16 +45,16 @@ const escapeHtml = (unsafe) => {
 
 
 function open_popup( img_url , text ){
-            
+
     let css = `
         <style>
         img {
-    
+
                      width: 100%;
                       height:100%;
                       object-fit: contain;
                       user-drag: none;
-          
+
             }
             @media (prefers-color-scheme: light) {
                 body {
@@ -71,7 +71,7 @@ function open_popup( img_url , text ){
                 margin: 0;
                 -webkit-user-select: none;
                     -webkit-app-region: drag;
-                  
+
                       user-drag: none;
                         -webkit-user-drag: none;
                         user-select: none;
@@ -82,17 +82,16 @@ function open_popup( img_url , text ){
             p{
                 padding:40px;
             }
-
        </style>
     `
     let html = '<html><head>'+css+'</head><body>' ;
 
     if (img_url)
         html += '<img src="'+escapeHtml(img_url)+'"> ';
-    
+
     if( text )
          html += '<p> '+ escapeHtml(text) +' </p>';
-    
+
     html += '</body></html>'
     
     let uri = "data:text/html," + encodeURIComponent(html);
@@ -117,7 +116,7 @@ function addImageProcess(src){
     })
   }
 
-// this will only be called when the user clicks to upload thier data for sharing. 
+// this will only be called when the user clicks to upload thier data for sharing.
 async function temp_upload_img(img_path) {
     let img_tag = await addImageProcess("file://" + img_path)
     let file = await fetch(img_tag.src);
@@ -127,7 +126,7 @@ async function temp_upload_img(img_path) {
     try {
        let x = await fetch('https://bee.transfr.one/file.png', {
             method: 'PUT',
-            body: file 
+            body: file
         });
         if(x.status != 200)
              throw 'Could not upload';
@@ -136,24 +135,32 @@ async function temp_upload_img(img_path) {
     } catch (error) {
         throw 'Could not upload';
     }
-  
+
   }
 
-// this will only be called when the user clicks to upload thier data for sharing. 
-async function share_on_arthub(imgs , params,  prompt ) {
+// Sharable URLS
+const share_options = [
+    {
+        name: 'ArtHub.ai',
+        url: 'https://arthub.ai/upload',
+    },
+    {
+        name: 'web3.storage',
+        url: 'https://web3-storage.github.io/ai-artwork-uploader',
+    }
+]
+
+// this will only be called when the user clicks to upload their data for sharing.
+async function open_share_url(share_url, imgs , params,  prompt ) {
     let urls = [];
     for(let im of imgs)
         if(im != 'nsfw')
             urls.push( await temp_upload_img(im))
 
-    console.log(urls.join(','))
-
-    let share_url = "https://arthub.ai/upload?";
-
     params = JSON.parse(JSON.stringify(params))
 
 
-    share_url += "description="+ prompt + "&";
+    share_url += "?description="+ prompt + "&";
     if(!params.model_version)
         params.model_version = ""
     params.model_version = "DiffusionBee" + params.model_version  ;
@@ -164,4 +171,4 @@ async function share_on_arthub(imgs , params,  prompt ) {
 
 
 
-export { compute_n_cols ,resolve_asset_illustration , simple_hash , open_popup, share_on_arthub}
+export { compute_n_cols ,resolve_asset_illustration , simple_hash , open_popup, open_share_url, share_options}

@@ -17,6 +17,7 @@
         <div @click="toggle_order()" style="float:right; margin-bottom: 20px;" class="l_button">
           {{this.app_state.show_history_in_oldest_first ? "Oldest": "Newest"}} First
         </div>
+
         <div @click="clear_history()" style="float:right; margin-bottom: 20px;" class="l_button">
           Clear History
         </div>
@@ -32,39 +33,38 @@
 
             
                 <div @click="delete_hist(history_box.key)" style="float:right; margin-top: 10px;"  class="l_button">Delete</div>
-                <!-- <div @click="share_on_arthub(history_box)" style="float:right; margin-top: 10px;"  class="l_button">Share</div> -->
 
                 <b-dropdown left variant="link" size="sm" toggle-class="text-decoration-none" no-caret style="float:right; margin-top: 5px;">
                     <template #button-content>
-                        <div   class=" l_button "  >
-                            Share 
+                        <div class=" l_button ">
+                            Share
                         </div>
                     </template>
-                    <b-dropdown-item-button   @click="share_on_arthub(history_box)"  >Share on ArtHub.ai</b-dropdown-item-button>
+                    <b-dropdown-item-button v-for="option in share_options" :key="option.name" @click="share_images(option, history_box)"  >Share on {{option.name}}</b-dropdown-item-button>
                 </b-dropdown>
 
-                
+
                 <p class="history_box_info text_bg" style="user-select: text;">
                     <img  v-if="history_box.inp_img" :src="'file://' + history_box.inp_img" style="height:50px">
                     <br  v-if="history_box.inp_img" >
                     <br  v-if="history_box.inp_img" >
-              
+
                     <span style="opacity: 0.5;" v-if="get_box_params_str(history_box)"> {{get_box_params_str(history_box)}} </span>
                     <br   v-if="get_box_params_str(history_box)">
-                    
+
                     {{history_box.prompt}}
 
 
                 </p>
-                
+
                 <div v-for="img in history_box.imgs" :key="img" class="history_box">
-                
+
                     <ImageItem :app_state="app_state" :hide_extra_save_button="true" :path="img" :style_obj="{height:'100%'}"></ImageItem>
-                
+
                 </div>
                 <div style="clear: both; display: table; margin-bottom: 10px;">
                 </div>
-                
+
                 <hr>
 
 
@@ -89,7 +89,7 @@
 <script>
 import ImageItem from '../components/ImageItem.vue'
 import {native_confirm} from "../native_functions_vue_bridge.js";
-import {share_on_arthub} from '../utils.js'
+import {open_share_url, share_options} from '../utils.js'
 
 import Vue from 'vue'
 import Fuse from 'fuse.js'
@@ -109,6 +109,7 @@ export default {
         return {
             searchText: '',
             currentPage: 1,
+            share_options,
         };
     },
 
@@ -161,23 +162,24 @@ export default {
             return r;
         },
 
-         clear_history(){
+        clear_history(){
             if (native_confirm("Are you sure you want to clear history?")){
                 Vue.set( this.app_state.app_data, "history", {});
             }
         },
 
-        share_on_arthub(box){
+        async share_images(share_option, box){
             this.app_state.global_loader_modal_msg = "Uploading";
             let params = this.get_box_params_dict(box);
-            let that = this;
-            share_on_arthub(box.imgs , params , box.prompt).then((
-                function(){ that.app_state.global_loader_modal_msg = ""}
-            )).catch(
-                function(){alert("Error in uploading.") ; that.app_state.global_loader_modal_msg = ""}
-            )
-        }
+            try {
+                await open_share_url(share_option.url, box.imgs , params , box.prompt);
+            } catch (error) {
+                console.error(error);
+                alert("Error in uploading.");
+            }
 
+            this.app_state.global_loader_modal_msg = ""
+        }
     },
 }
 </script>
@@ -203,7 +205,7 @@ export default {
 </style>
 <style scoped>
 .history_box_info {
-   
+
     padding :12px;
     border-radius: 5px;
     max-width: calc(100vw - 200px );
