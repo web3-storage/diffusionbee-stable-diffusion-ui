@@ -108,8 +108,15 @@
         <p>Please close other applications for best speed.</p>
     </div>
 
-    <div @click="share_current_arthub"  v-if="generated_images.length > 0"  class="l_button bottom_float" style="right : 10px; bottom : 15px; background-color: inherit; cursor: pointer;">Share on ArtHub.ai</div>
-
+    <b-dropdown v-if="generated_images.length > 0" left variant="link" size="sm" toggle-class="text-decoration-none" no-caret style="float:right; margin-top: 5px;">
+        <template #button-content>
+            <div class="l_button bottom_float" style="right : 10px; bottom : 15px; background-color: inherit; cursor: pointer;">
+                Share 
+            </div>
+        </template>
+        <b-dropdown-item-button @click="share_current_arthub">Share on ArtHub.ai</b-dropdown-item-button>
+        <b-dropdown-item-button @click="share_current_w3up">Share on web3.storage</b-dropdown-item-button>
+    </b-dropdown>
 
 </div>
 
@@ -121,7 +128,7 @@
 import LoaderModal from '../components_bare/LoaderModal.vue'
 import Vue from 'vue'
 import ImageItem from '../components/ImageItem.vue'
-import {share_on_arthub} from '../utils.js'
+import {share_on_arthub, share_on_w3up} from '../utils.js'
 import SDOptionsDropdown from '../components_bare/SDOptionsDropdown.vue'
 
 export default {
@@ -277,6 +284,19 @@ export default {
                 function(){alert("Error in uploading.") ; that.app_state.global_loader_modal_msg = ""}
             )
         },
+        
+        share_current_w3up(){
+            let params =  {
+                "Img Width": Number(this.img_w),
+                "Img Height" : Number(this.img_h),
+                Seed :this.computed_seed,
+                Scale : this.guidence_scale,
+                Steps : this.dif_steps,
+                model_version: this.stable_diffusion.model_version,
+            }
+            
+            share_on_w3up( this.generated_images, params, this.prompt)
+        }
 
     },
 }

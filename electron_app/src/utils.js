@@ -162,6 +162,19 @@ async function share_on_arthub(imgs , params,  prompt ) {
     window.ipcRenderer.sendSync('open_url', share_url );
 }
 
+async function share_on_w3up(imgs, params, prompt) {
+    const imageURLs = imgs.filter(path=> path != 'nsfw').map(path => `file://${path}`)
+    const jsonParams = JSON.parse(JSON.stringify(params))
 
+    if(!jsonParams.model_version) {
+        params.model_version = ''
+    }
+    params.model_version = 'DiffusionBee' + params.model_version;
 
-export { compute_n_cols ,resolve_asset_illustration , simple_hash , open_popup, share_on_arthub}
+    const modalUrlParams = `description=${prompt}&params=${JSON.stringify(jsonParams)}&images=${imageURLs.join(',')}`
+    const frame = navigator.platform.toUpperCase().indexOf('MAC') >= 0 ? ',frame=false' : ''
+
+    window.open(`w3up-integration.html?${modalUrlParams}`, '_blank', `top=100,left=100,nodeIntegration=no${frame}`)
+}
+
+export { compute_n_cols ,resolve_asset_illustration , simple_hash , open_popup, share_on_arthub, share_on_w3up}

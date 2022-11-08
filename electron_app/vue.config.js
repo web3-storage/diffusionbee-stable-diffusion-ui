@@ -1,6 +1,13 @@
 
 module.exports = {
-    
+    pages: {
+      'w3up-integration': {
+        entry: './src/w3up-integration/component.js',
+        template: 'public/w3up-integration.html',
+        filename: 'w3up-integration.html',
+        chunks: ['w3up-integration']
+      }
+    },
     pluginOptions: {
         electronBuilder: {
             preload: './src/preload.js',
