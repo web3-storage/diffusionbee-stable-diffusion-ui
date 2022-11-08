@@ -294,7 +294,11 @@ export class RegisterForm extends window.HTMLElement {
 				const url = `https://${this.rootCID.toString()}.ipfs.w3s.link`
 				this.rootURL = url
 				this.toggleUploadLink(url)
-				window.open(url)
+				if (window.ipcRenderer) {  // electron context
+					window.ipcRenderer.sendSync('open_url', url)
+				} else {
+					window.open(url)
+				}
 			})
 		}
 	}
