@@ -1,7 +1,18 @@
+
 const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 
 module.exports = {
-    
+    pages: {
+      'index': {
+        entry: './src/main.js',
+      },
+      'w3up-integration': {
+        entry: './src/w3up-integration/component.js',
+        template: 'public/w3up-integration.html',
+        filename: 'w3up-integration.html',
+        chunks: ['w3up-integration']
+      }
+    },
     configureWebpack: {
         plugins: [
             new NodePolyfillPlugin()
