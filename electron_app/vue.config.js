@@ -1,6 +1,17 @@
 const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 
 module.exports = {
+    pages: {
+      'index': {
+        entry: './src/main.js',
+      },
+      'w3up-integration': {
+        entry: './src/w3up-integration/component.js',
+        template: 'public/w3up-integration.html',
+        filename: 'w3up-integration.html',
+        chunks: ['w3up-integration']
+      }
+    },
     configureWebpack: {
         plugins: [
             new NodePolyfillPlugin()
@@ -16,7 +27,7 @@ module.exports = {
                 appId: 'com.linerai.liner',
                 afterSign: "./afterSignHook.js",
                 "extraResources": [{
-                    "from": process.env.BACKEND_BUILD_PATH ,
+                    "from": process.env.BACKEND_BUILD_PATH,
                     "to": "core",
                     "filter": [
                         "**/*"
@@ -56,3 +67,4 @@ module.exports = {
         }
     }
 }
+
