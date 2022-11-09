@@ -41,6 +41,7 @@
                         </div>
                     </template>
                     <b-dropdown-item-button   @click="share_on_arthub(history_box)"  >Share on ArtHub.ai</b-dropdown-item-button>
+                    <b-dropdown-item-button @click="share_on_w3up(history_box)">Share on web3.storage</b-dropdown-item-button>
                 </b-dropdown>
 
                 
@@ -89,7 +90,8 @@
 <script>
 import ImageItem from '../components/ImageItem.vue'
 import {native_confirm} from "../native_functions_vue_bridge.js";
-import {share_on_arthub} from '../utils.js'
+
+import {share_on_arthub, share_on_w3up} from '../utils.js'
 
 import Vue from 'vue'
 import Fuse from 'fuse.js'
@@ -176,6 +178,10 @@ export default {
             )).catch(
                 function(){alert("Error in uploading.") ; that.app_state.global_loader_modal_msg = ""}
             )
+        },
+        share_on_w3up(box){
+            let params = this.get_box_params_dict(box);
+            share_on_w3up(box.imgs , params , box.prompt)
         }
 
     },

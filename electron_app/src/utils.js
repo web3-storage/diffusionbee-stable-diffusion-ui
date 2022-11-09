@@ -141,8 +141,6 @@ async function temp_upload_img(img_path) {
 
 // this will only be called when the user clicks to upload thier data for sharing. 
 async function share_on_arthub(imgs , params,  prompt ) {
-    share_on_w3up(imgs, params, prompt)
-    return
     let urls = [];
     for(let im of imgs)
         if(im != 'nsfw')
@@ -179,4 +177,4 @@ async function share_on_w3up(imgs, params, prompt) {
     window.open(`w3up-integration.html?${modalUrlParams}`, '_blank', `top=100,left=100,nodeIntegration=no${frame}`)
 }
 
-export { compute_n_cols ,resolve_asset_illustration , simple_hash , open_popup, share_on_arthub}
+export { compute_n_cols ,resolve_asset_illustration , simple_hash , open_popup, share_on_arthub, share_on_w3up}
