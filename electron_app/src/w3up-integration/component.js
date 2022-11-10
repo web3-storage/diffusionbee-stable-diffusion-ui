@@ -274,7 +274,7 @@ export class RegisterForm extends window.HTMLElement {
 			<div>${promptEl}</div>
 			<div>${paramsEl}</div>
 		</div>
-		<p style="margin-top: 2em; margin-bottom: 1em; font-weight: 100;">Generate your own art with <a href="https://diffusionbee.com/">DiffusionBee</a>! Gallery and image hosted on IPFS with <a href="https://web3.storage/">web3.storage.</a></p>
+		<p style="margin-top: 2em; margin-bottom: 1em; font-weight: 100;">Generate your own art with <a href="https://diffusionbee.com/" target="_blank">DiffusionBee</a>! Gallery and image hosted on IPFS with <a href="https://web3.storage/" target="_blank">web3.storage.</a></p>
 	</body>
 </html>
 `
