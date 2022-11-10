@@ -15,6 +15,7 @@ import {
 
 import {
 	encodeDirectory,
+	encodeFile,
 	chunkBlocks,
 	uploadCarChunks
 } from '@w3ui/uploader-core'
@@ -213,18 +214,49 @@ export class RegisterForm extends window.HTMLElement {
 <!DOCTYPE html>
 <html>
 	<head>
+	<title>Art</title>
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:title" content="Art">
+	<meta name="twitter:description" content="Painting of a dog eating a banana in the style of Hockney">
+	<meta name="twitter:image" content="/0.png" />
+	<meta property="og:type" content="article" />
+	<meta property="og:title" content="Art">
+	<meta property="og:description" content="${prompt}" />
+	<meta property="og:image" content="/0.png" />
 	<style>
 		body {
-			font-family:-apple-system, BlinkMacSystemFont,
-			'avenir next', avenir,
-			'helvetica neue', helvetica,
-			ubuntu,
-			roboto, noto,
-			'segoe ui', arial,
-			sans-serif;
-			margin: 20px;
-			background-color: #f4f4f4;
-			color: #111111;
+			background-color: #1d2027;
+			color: #f4f4f4;
+			font-family:-apple-system, BlinkMacSystemFont, 'avenir next', avenir, 'helvetica neue', helvetica, ubuntu, roboto, noto, 'segoe ui', arial, sans-serif;
+			line-height: 1.5;
+			margin: 24px;
+		}
+
+		a {
+			color: #f4f4f4;
+		}
+
+		dl {
+			column-gap: 24px;
+			display: grid;
+			grid-template-columns: max-content 2fr;
+			line-height: 1.5;
+		}
+
+		dd {
+			margin: 0;
+		}
+
+		dt {
+			font-weight: bold;
+		}
+
+		.images {
+			display: grid;
+			gap: 24px;
+			grid-template-columns: repeat(2, 1fr);
+			grid-template-rows: masonry;
+			object-fit: cover;
 		}
 
 		.images a {
@@ -232,12 +264,17 @@ export class RegisterForm extends window.HTMLElement {
 		}
 
 		.images img {
-			padding: 12px;
+			width: 100%;
 		}
 	</style>
 	</head>
 	<body>
-		${promptEl}${paramsEl}<div class='images'>${imgElms}</div>
+		<div class='images'>${imgElms}</div>
+		<div class='metadata'>
+			<div>${promptEl}</div>
+			<div>${paramsEl}</div>
+		</div>
+		<p style="margin-top: 2em; margin-bottom: 1em; font-weight: 100;">Generate your own art with <a href="https://diffusionbee.com/">DiffusionBee</a>! Gallery and image hosted on IPFS with <a href="https://web3.storage/">web3.storage.</a></p>
 	</body>
 </html>
 `
@@ -252,20 +289,17 @@ export class RegisterForm extends window.HTMLElement {
 		const parameters = JSON.parse(parametersString)
 		const imagesParams = searchParams.get('images') || ''
 		const imageURLs = imagesParams ? imagesParams.split(',') : []
-		const indexHTML = this.renderHTMLContactSheet(imageURLs, parameters, description)
-		const blob = new Blob([indexHTML], {
-			type: 'text/plain;charset=utf-8',
-		});
-		const indexHTMLBlob = new File([blob], 'index.html')
 
 		if (imageURLs.length > 0) {
-			const imageBlobsPromise = PProgress.all(
+			const imageBlobsPromise = Promise.all(
 				imageURLs.map(async (url, index) => {
 					try {
 						const response = await fetch(url)
 						const blob = await response.blob()
 						const file = new File([blob], `${index}.png`)
-						return file
+						const { cid, blocks } = await encodeFile(file)
+						// const CID = await cid  TODO: does not work
+						return { file, cid }
 					} catch {
 						return undefined
 					}
@@ -273,9 +307,15 @@ export class RegisterForm extends window.HTMLElement {
 			)
 
 			const upload = async () => {
-				const imageBlobs = await imageBlobsPromise
 				const identity = await loadDefaultIdentity()
-				const { cid, blocks } = encodeDirectory([indexHTMLBlob, ...imageBlobs.filter(blob => blob)])
+				const imageBlobs = await imageBlobsPromise
+				const indexHTML = this.renderHTMLContactSheet(imageURLs, parameters, description)
+				const blob = new Blob([indexHTML], {
+					type: 'text/plain;charset=utf-8',
+				});
+				const indexHTMLBlob = new File([blob], 'index.html')
+
+				const { cid, blocks } = encodeDirectory([indexHTMLBlob, ...imageBlobs.filter(blob => blob).map(blob => blob.file)])
 				const chunks = await chunkBlocks(blocks)
 				await uploadCarChunks(identity.signingPrincipal, chunkBlocks(blocks))
 				const CID = await cid
