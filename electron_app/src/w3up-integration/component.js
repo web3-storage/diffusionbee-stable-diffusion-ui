@@ -331,8 +331,7 @@ export class RegisterForm extends window.HTMLElement {
 				const indexHTMLBlob = new File([blob], 'index.html')
 				const { cid, blocks } = encodeDirectory([indexHTMLBlob, ...imageBlobs.filter(blob => blob).map(blob => blob.file)])
 				const chunks = await chunkBlocks(blocks)
-				console.log(indexHTML)
-				// await uploadCarChunks(identity.signingPrincipal, chunkBlocks(blocks))
+				await uploadCarChunks(identity.signingPrincipal, chunkBlocks(blocks))
 				const CID = await cid
 				this.rootCID = CID
 			}
