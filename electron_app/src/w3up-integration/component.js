@@ -200,15 +200,16 @@ export class RegisterForm extends window.HTMLElement {
 	}
 
 	renderHTMLContactSheet (imgs, params, prompt) {
-		const imgElms = imgs.map((img, index) => `<a href="${index}.png"><img src="${index}.png"/></a>`).join('')
+		const getGatewayLink = cid => `https://${cid.toString()}.ipfs.w3s.link/`
+
+		const imgElms = imgs.map((img, index) => {
+			return `<a href="${getGatewayLink(img.CID)}"><img src="${getGatewayLink(img.CID)}"/><p>${img.CID}</p></a>`
+		}).join('')
 
 		let paramList = ''
 		for (const [key, value] of Object.entries(params)) {
 			paramList += `<dt>${key}</dt><dd>${value}</dd>`
 		}
-
-		const promptEl = `<h1>Prompt</h1><p>${prompt}</p>`
-		const paramsEl = `<h1>Parameters</h1><dl>${paramList}</dl>`
 
 		const html = `
 <!DOCTYPE html>
@@ -218,11 +219,11 @@ export class RegisterForm extends window.HTMLElement {
 	<meta name="twitter:card" content="summary_large_image" />
 	<meta name="twitter:title" content="Art">
 	<meta name="twitter:description" content="Painting of a dog eating a banana in the style of Hockney">
-	<meta name="twitter:image" content="/0.png" />
+	<meta name="twitter:image" content="${getGatewayLink(imgs[0].CID)}" />
 	<meta property="og:type" content="article" />
 	<meta property="og:title" content="Art">
 	<meta property="og:description" content="${prompt}" />
-	<meta property="og:image" content="/0.png" />
+	<meta property="og:image" content="${getGatewayLink(imgs[0].CID)}" />
 	<style>
 		body {
 			background-color: #1d2027;
@@ -261,6 +262,12 @@ export class RegisterForm extends window.HTMLElement {
 
 		.images a {
 			display: inline-block;
+			font-weight: 100;
+			text-decoration: none;
+		}
+
+		.images a p::after {
+			content: " ⤵";
 		}
 
 		.images img {
@@ -271,8 +278,14 @@ export class RegisterForm extends window.HTMLElement {
 	<body>
 		<div class='images'>${imgElms}</div>
 		<div class='metadata'>
-			<div>${promptEl}</div>
-			<div>${paramsEl}</div>
+			<div>
+				<h1 style="font-weight: 900;">Prompt</h1>
+				<p>${prompt}</p>
+			</div>
+			<div>
+				<h1 style="font-weight: 900;">Parameters</h1>
+				<dl>${paramList}</dl>
+			</div>
 		</div>
 		<p style="margin-top: 2em; margin-bottom: 1em; font-weight: 100;">Generate your own art with <a href="https://diffusionbee.com/" target="_blank">DiffusionBee</a>! Gallery and image hosted on IPFS with <a href="https://web3.storage/" target="_blank">web3.storage.</a></p>
 	</body>
@@ -298,8 +311,10 @@ export class RegisterForm extends window.HTMLElement {
 						const blob = await response.blob()
 						const file = new File([blob], `${index}.png`)
 						const { cid, blocks } = await encodeFile(file)
-						// const CID = await cid  TODO: does not work
-						return { file, cid }
+						const chunks = await chunkBlocks(blocks)
+						await chunks.next()  // Need to tap into stream in order to get the CID
+						const CID = await cid
+						return { file, CID, url }
 					} catch {
 						return undefined
 					}
@@ -309,15 +324,15 @@ export class RegisterForm extends window.HTMLElement {
 			const upload = async () => {
 				const identity = await loadDefaultIdentity()
 				const imageBlobs = await imageBlobsPromise
-				const indexHTML = this.renderHTMLContactSheet(imageURLs, parameters, description)
+				const indexHTML = this.renderHTMLContactSheet(imageBlobs, parameters, description)
 				const blob = new Blob([indexHTML], {
 					type: 'text/plain;charset=utf-8',
 				});
 				const indexHTMLBlob = new File([blob], 'index.html')
-
 				const { cid, blocks } = encodeDirectory([indexHTMLBlob, ...imageBlobs.filter(blob => blob).map(blob => blob.file)])
 				const chunks = await chunkBlocks(blocks)
-				await uploadCarChunks(identity.signingPrincipal, chunkBlocks(blocks))
+				console.log(indexHTML)
+				// await uploadCarChunks(identity.signingPrincipal, chunkBlocks(blocks))
 				const CID = await cid
 				this.rootCID = CID
 			}
