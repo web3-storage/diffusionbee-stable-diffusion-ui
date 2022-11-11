@@ -256,9 +256,13 @@ export class RegisterForm extends window.HTMLElement {
 		.images {
 			display: grid;
 			gap: 24px;
-			grid-template-columns: repeat(2, 1fr);
-			grid-template-rows: masonry;
-			object-fit: cover;
+			grid-template-columns: repeat(1, 1fr);
+		}
+
+		@media screen and (min-width: 800px) {
+			.images {
+				grid-template-columns: repeat(2, 1fr);
+			}
 		}
 
 		.images a {
