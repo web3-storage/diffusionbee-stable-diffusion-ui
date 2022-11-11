@@ -215,6 +215,7 @@ export class RegisterForm extends window.HTMLElement {
 <!DOCTYPE html>
 <html>
 	<head>
+	<meta charset="utf-8">
 	<title>Art</title>
 	<meta name="twitter:card" content="summary_large_image" />
 	<meta name="twitter:title" content="Art">
